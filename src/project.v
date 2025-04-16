@@ -1,10 +1,9 @@
 /*
- * \"Bounce\" by Lam Pham, 2025
+ * \"Sleepwell\" by Lam Pham, 2025
  * Synthesizable Version with detailed comments
  */
 
 `default_nettype none
-
 module tt_um_sleepwell(
   input  wire [7:0] ui_in,    // Dedicated inputs
   output wire [7:0] uo_out,   // Dedicated outputs
@@ -52,8 +51,6 @@ module tt_um_sleepwell(
   parameter BALL_Y_SPEED  = 2;
 
   // Ball state registers
-  //The initial block isn't synthesizable for most FPGA/ASIC flows
-  //Replaced with synchronous reset logic within an always @(posedge clk) block
   reg [9:0] ball_x;
   reg [9:0] ball_y;
   reg ball_x_dir; // 1: moving right, 0: moving left
@@ -69,7 +66,6 @@ module tt_um_sleepwell(
       ball_y_dir <= 1;
     end else if (x == 0 && y == 0) begin
       // Update horizontal ball position based on direction
-      //Your original code updated positions twice due to duplication. I fixed it to update exactly once per frame refresh (at the top-left pixel)
       if (ball_x_dir)
         ball_x <= ball_x + BALL_X_SPEED;
       else
@@ -82,7 +78,6 @@ module tt_um_sleepwell(
         ball_y <= ball_y - BALL_Y_SPEED;
 
       // Check horizontal boundaries and reverse direction if necessary
-      // Conditions for bouncing at screen edges were updated with explicit boundary checking 
       if (ball_x <= BALL_SIZE)
         ball_x_dir <= 1;
       else if (ball_x >= (640 - BALL_SIZE))
@@ -97,18 +92,131 @@ module tt_um_sleepwell(
   end
 
   // Calculate squared distance from current pixel to ball center
-  //Introduced an intermediate combine_eq wire to simplify rendering conditions and readability
   wire [20:0] combine_eq = (x - ball_x) * (x - ball_x) + (y - ball_y) * (y - ball_y);
 
   // Determine if current pixel is within ball or its shadow area
   wire ball_active = video_active && (combine_eq <= BALL_SIZE * BALL_SIZE);
   wire shadow_active = video_active && (combine_eq <= (BALL_SIZE + 4) * (BALL_SIZE + 4));
 
-  // VGA color output selection (basketball and shadow colors)
+  // SJSU Text Display Parameters
+  parameter LETTER_WIDTH = 30;
+  parameter LETTER_HEIGHT = 50;
+  parameter LETTER_COLOR = 6'b11_11_00; // Yellow letters
+  parameter BG_COLOR = 6'b00_00_10; // Darker blue 
+  
+  // Letter positions (centered)
+  localparam S1_X = 184;
+  localparam J_X  = 253;
+  localparam S2_X = 322;
+  localparam U_X  = 391;
+  localparam LETTER_Y = 220;
+
+  // Letter ROM (simplified patterns)
+  reg [29:0] letter_rom [0:199];
+  initial begin
+    // Letter S (first)
+    letter_rom[0]   = 30'b000001111111111111111111100000;
+    letter_rom[1]   = 30'b000011111111111111111111110000;
+    letter_rom[2]   = 30'b000111111000000000000001111000;
+    letter_rom[3]   = 30'b000111100000000000000000111000;
+    letter_rom[4]   = 30'b000111000000000000000000011100;
+    letter_rom[5]   = 30'b000111000000000000000000011100;
+    letter_rom[6]   = 30'b000000000000000000000000011100;
+    letter_rom[7]   = 30'b000000000000000000000000011100;
+    letter_rom[8]   = 30'b000000000000000000000000111100;
+    letter_rom[9]   = 30'b000000011111111111111111111000;
+    letter_rom[10]  = 30'b000001111111111111111111110000;
+    letter_rom[11]  = 30'b000011111111111111111111100000;
+    letter_rom[12]  = 30'b000111110000000000000000000000;
+    letter_rom[13]  = 30'b000111100000000000000000000000;
+    letter_rom[14]  = 30'b000111000000000000000000000000;
+    letter_rom[15]  = 30'b000111000000000000000000011100;
+    letter_rom[16]  = 30'b000111000000000000000000011100;
+    letter_rom[17]  = 30'b000111100000000000000000111000;
+    letter_rom[18]  = 30'b000111111000000000000001111000;
+    letter_rom[19]  = 30'b000011111111111111111111110000;
+    letter_rom[20]  = 30'b000001111111111111111111100000;
+    // ... (fill all 50 rows for S)
+    
+    // Letter J
+    letter_rom[50]  = 30'b000000000000000000000000000000;
+    letter_rom[51]  = 30'b000000000000000000000000000000;
+    letter_rom[52]  = 30'b000000000000000000000000000000;
+    letter_rom[53]  = 30'b000000000000000000000000000000;
+    letter_rom[54]  = 30'b000111000000000000000000000000;
+    letter_rom[55]  = 30'b000111000000000000000000000000;
+    letter_rom[56]  = 30'b000111000000000000000000000000;
+    letter_rom[57]  = 30'b000111000000000000000000000000;
+    letter_rom[58]  = 30'b000111000000000000000000000000;
+    letter_rom[59]  = 30'b000111000000000000000000000000;
+    letter_rom[60]  = 30'b000111000000000000000000000000;
+    letter_rom[61]  = 30'b000111000000000000000000000000;
+    letter_rom[62]  = 30'b000111000000000000000000000000;
+    letter_rom[63]  = 30'b000111000000000000000000000000;
+    letter_rom[64]  = 30'b000111000000000000000000000000;
+    letter_rom[65]  = 30'b000111000000000000000000011100;
+    letter_rom[66]  = 30'b000111000000000000000000011100;
+    letter_rom[67]  = 30'b000111100000000000000000111000;
+    letter_rom[68]  = 30'b000011111111111111111111110000;
+    letter_rom[69]  = 30'b000001111111111111111111100000;
+    // ... (fill all 50 rows for J)
+    
+    // Letter S (second) - same as first S
+    for (int i=0; i<50; i=i+1) letter_rom[100+i] = letter_rom[i];
+    
+    // Letter U
+    letter_rom[150] = 30'b000111000000000000000000111000;
+    letter_rom[151] = 30'b000111000000000000000000111000;
+    letter_rom[152] = 30'b000111000000000000000000111000;
+    letter_rom[153] = 30'b000111000000000000000000111000;
+    letter_rom[154] = 30'b000111000000000000000000111000;
+    letter_rom[155] = 30'b000111000000000000000000111000;
+    letter_rom[156] = 30'b000111000000000000000000111000;
+    letter_rom[157] = 30'b000111000000000000000000111000;
+    letter_rom[158] = 30'b000111000000000000000000111000;
+    letter_rom[159] = 30'b000111000000000000000000111000;
+    letter_rom[160] = 30'b000111000000000000000000111000;
+    letter_rom[161] = 30'b000111000000000000000000111000;
+    letter_rom[162] = 30'b000111000000000000000000111000;
+    letter_rom[163] = 30'b000111000000000000000000111000;
+    letter_rom[164] = 30'b000111000000000000000000111000;
+    letter_rom[165] = 30'b000111100000000000000001111000;
+    letter_rom[166] = 30'b000011111111111111111111110000;
+    letter_rom[167] = 30'b000001111111111111111111100000;
+    // ... (fill all 50 rows for U)
+  end
+
+  // Letter rendering
+  wire in_s1 = (x >= S1_X) && (x < S1_X + LETTER_WIDTH) && 
+               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+  wire in_j  = (x >= J_X)  && (x < J_X + LETTER_WIDTH) && 
+               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+  wire in_s2 = (x >= S2_X) && (x < S2_X + LETTER_WIDTH) && 
+               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+  wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
+               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+
+  wire [7:0] rom_addr = 
+    in_s1 ? (y - LETTER_Y) :
+    in_j  ? (y - LETTER_Y) + 50 :
+    in_s2 ? (y - LETTER_Y) + 100 :
+            (y - LETTER_Y) + 150;
+  
+  wire [4:0] pixel_col = x - 
+    (in_s1 ? S1_X : 
+     in_j  ? J_X  : 
+     in_s2 ? S2_X : 
+             U_X);
+  
+  wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
+                     letter_rom[rom_addr][pixel_col] : 0;
+
+  // Final output with priority: Ball > Shadow > Text > Background
   assign {R, G, B} =
     (!video_active) ? 6'b00_00_00 :      // Black outside active area
-    ball_active ? 6'b11_10_00 :          // Orange ball color
-    shadow_active ? 6'b01_01_01 :        // Grey shadow color
-                    6'b00_00_00;         // Black background
+    ball_active    ? 6'b11_10_00 :       // Orange ball (highest priority)
+    shadow_active  ? 6'b01_01_01 :       // Grey shadow
+    letter_pixel   ? LETTER_COLOR :      // Yellow text
+                     BG_COLOR;          // Blue background
 
 endmodule
