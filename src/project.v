@@ -200,7 +200,9 @@ module tt_um_sleepwell(
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
 // Letter rendering
-  wire [7:0] y_minus_letter = y - 8'(LETTER_Y);  // SystemVerilog-style cast
+  /* verilator lint_off WIDTHTRUNC */
+  wire [7:0] y_minus_letter = y - LETTER_Y;
+  /* verilator lint_on WIDTHTRUNC */
   wire [7:0] y_offset = (y >= LETTER_Y) ? y_minus_letter[7:0] : 8'd0;
   wire [7:0] rom_addr = 
     (in_s1 && (y_offset < 50))  ? y_offset :
