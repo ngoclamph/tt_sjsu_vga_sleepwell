@@ -203,10 +203,10 @@ module tt_um_sleepwell(
   wire [7:0] y_minus_letter = y - LETTER_Y;  // Changed from [9:0] to [7:0]
   wire [7:0] y_offset = (y >= LETTER_Y) ? y_minus_letter[7:0] : 8'd0;
   wire [7:0] rom_addr = 
-    in_s1 ? y_offset :
-    in_j  ? (y_offset < 200 - 50) ? y_offset + 8'd50 : 8'd0 :
-    in_s2 ? (y_offset < 200 - 100) ? y_offset + 8'd100 : 8'd0 :
-            (y_offset < 200 - 150) ? y_offset + 8'd150 : 8'd0;
+    (in_s1 && (y_offset < 50))  ? y_offset :
+    (in_j  && (y_offset < 50))  ? y_offset + 8'd50  :
+    (in_s2 && (y_offset < 50))  ? y_offset + 8'd100 :
+    (in_u  && (y_offset < 50))  ? y_offset + 8'd150 : 8'd0;
 
 // Pixel column calculation with explicit width control
   wire [9:0] x_minus_pos = 
