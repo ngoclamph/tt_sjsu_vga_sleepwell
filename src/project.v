@@ -25,8 +25,8 @@ module tt_um_sleepwell(
 
   // VGA outputs assignment (RGB and sync signals)
   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  assign uio_out = 0; // Not used in this design
-  assign uio_oe  = 0; // Not used in this design
+  assign uio_out = 8'b0;  // Explicit 8-bit zero assignment
+  assign uio_oe = 8'b0;   // All IOs as inputs
 
   // Suppress warnings for unused signals
   wire _unused_ok = &{ena, ui_in, uio_in};
