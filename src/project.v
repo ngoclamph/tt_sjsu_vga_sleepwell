@@ -202,18 +202,22 @@ module tt_um_sleepwell(
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
 // Letter rendering
-wire [7:0] y_offset = y - LETTER_Y[7:0]; // Ensure 8-bit calculation
+wire [9:0] y_offset_full = y - LETTER_Y;  // Full 10-bit calculation
+wire [7:0] y_offset = y_offset_full[7:0]; // Explicit truncation to 8 bits
 wire [7:0] rom_addr = 
   in_s1 ? y_offset :
   in_j  ? y_offset + 8'd50 :
   in_s2 ? y_offset + 8'd100 :
           y_offset + 8'd150;
 
-wire [4:0] pixel_col = 
-  in_s1 ? x - S1_X :
-  in_j  ? x - J_X  : 
-  in_s2 ? x - S2_X : 
-          x - U_X;
+// Pixel column calculation with explicit width control
+wire [9:0] pixel_col_full = 
+  in_s1 ? (x - S1_X) :
+  in_j  ? (x - J_X) : 
+  in_s2 ? (x - S2_X) : 
+          (x - U_X);
+  
+wire [4:0] pixel_col = pixel_col_full[4:0]; // Explicit truncation to 5 bits
   
   wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
                      letter_rom[rom_addr][pixel_col] : 0;
