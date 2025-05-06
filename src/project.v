@@ -95,9 +95,7 @@ module tt_um_sleepwell(
   // Calculate squared distance from current pixel to ball center
   wire signed [10:0] x_diff = $signed({1'b0, x}) - $signed({1'b0, ball_x});
   wire signed [10:0] y_diff = $signed({1'b0, y}) - $signed({1'b0, ball_y});
-  wire [20:0] x_sq = x_diff * x_diff;
-  wire [20:0] y_sq = y_diff * y_diff;
-  wire [20:0] combine_eq = x_sq + y_sq;
+  wire [20:0] combine_eq = (x_diff * x_diff) + (y_diff * y_diff);
 
   // Determine if current pixel is within ball or its shadow area
   wire ball_active = video_active && (combine_eq <= BALL_SIZE * BALL_SIZE);
@@ -202,22 +200,22 @@ module tt_um_sleepwell(
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
 // Letter rendering
-wire [9:0] y_offset_full = y - LETTER_Y;  // Full 10-bit calculation
-wire [7:0] y_offset = y_offset_full[7:0]; // Explicit truncation to 8 bits
-wire [7:0] rom_addr = 
-  in_s1 ? y_offset :
-  in_j  ? y_offset + 8'd50 :
-  in_s2 ? y_offset + 8'd100 :
-          y_offset + 8'd150;
+  wire [9:0] y_minus_letter = y - LETTER_Y;
+  wire [7:0] y_offset = (y >= LETTER_Y) ? y_minus_letter[7:0] : 8'd0;
+  wire [7:0] rom_addr = 
+    in_s1 ? y_offset :
+    in_j  ? (y_offset < 200 - 50) ? y_offset + 8'd50 : 8'd0 :
+    in_s2 ? (y_offset < 200 - 100) ? y_offset + 8'd100 : 8'd0 :
+            (y_offset < 200 - 150) ? y_offset + 8'd150 : 8'd0;
 
 // Pixel column calculation with explicit width control
-wire [9:0] pixel_col_full = 
-  in_s1 ? (x - S1_X) :
-  in_j  ? (x - J_X) : 
-  in_s2 ? (x - S2_X) : 
-          (x - U_X);
-  
-wire [4:0] pixel_col = pixel_col_full[4:0]; // Explicit truncation to 5 bits
+  wire [9:0] x_minus_pos = 
+    in_s1 ? x - S1_X :
+    in_j  ? x - J_X : 
+    in_s2 ? x - S2_X : 
+            x - U_X;
+    
+  wire [4:0] pixel_col = (x_minus_pos < LETTER_WIDTH) ? x_minus_pos[4:0] : 5'd0;
   
   wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
                      letter_rom[rom_addr][pixel_col] : 0;
