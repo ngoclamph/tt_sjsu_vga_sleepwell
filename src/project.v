@@ -8,9 +8,9 @@
 module tt_um_sleepwell(
   input  wire [7:0] ui_in,    // Dedicated inputs
   output wire [7:0] uo_out,   // Dedicated outputs
-  input  wire [7:2] uio_in,   // IOs: Input path
-  output wire [7:2] uio_out,  // IOs: Output path
-  output wire [7:2] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+  input  wire [7:1] uio_in,   // IOs: Input path
+  output wire [7:1] uio_out,  // IOs: Output path
+  output wire [7:1] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
   input  wire       ena,      // Always 1 when the design is powered
   input  wire       clk,      // Clock
   input  wire       rst_n     // Active low reset
@@ -25,8 +25,8 @@ module tt_um_sleepwell(
 
   // VGA outputs assignment (RGB and sync signals)
   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  assign uio_out = 8'b0;  // Explicit 8-bit zero assignment
-  assign uio_oe = 8'b0;   // All IOs as inputs
+  assign uio_out = 8'b0; // Not used in this design
+  assign uio_oe  = 8'b0; // Not used in this design
 
   // Suppress warnings for unused signals
   wire _unused_ok = &{ena, ui_in, uio_in};
@@ -93,7 +93,9 @@ module tt_um_sleepwell(
   end
 
   // Calculate squared distance from current pixel to ball center
-  wire [20:0] combine_eq = (x - ball_x) * (x - ball_x) + (y - ball_y) * (y - ball_y);
+  wire [20:0] x_diff = {11'b0, x} - {11'b0, ball_x};
+  wire [20:0] y_diff = {11'b0, y} - {11'b0, ball_y};
+  wire [20:0] combine_eq = (x_diff * x_diff) + (y_diff * y_diff);
 
   // Determine if current pixel is within ball or its shadow area
   wire ball_active = video_active && (combine_eq <= BALL_SIZE * BALL_SIZE);
@@ -197,17 +199,18 @@ module tt_um_sleepwell(
   wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
-  wire [7:0] rom_addr = 
-    in_s1 ? (y - LETTER_Y) :
-    in_j  ? (y - LETTER_Y) + 50 :
-    in_s2 ? (y - LETTER_Y) + 100 :
-            (y - LETTER_Y) + 150;
-  
-  wire [4:0] pixel_col = x - 
-    (in_s1 ? S1_X : 
-     in_j  ? J_X  : 
-     in_s2 ? S2_X : 
-             U_X);
+// Letter rendering
+wire [7:0] rom_addr = 
+  in_s1 ? {3'b0, (y - LETTER_Y)} :
+  in_j  ? {3'b0, (y - LETTER_Y)} + 8'd50 :
+  in_s2 ? {3'b0, (y - LETTER_Y)} + 8'd100 :
+          {3'b0, (y - LETTER_Y)} + 8'd150;
+
+wire [4:0] pixel_col = 
+  in_s1 ? x - S1_X :
+  in_j  ? x - J_X  : 
+  in_s2 ? x - S2_X : 
+          x - U_X;
   
   wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
                      letter_rom[rom_addr][pixel_col] : 0;
