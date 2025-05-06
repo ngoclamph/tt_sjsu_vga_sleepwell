@@ -8,9 +8,9 @@
 module tt_um_sleepwell(
   input  wire [7:0] ui_in,    // Dedicated inputs
   output wire [7:0] uo_out,   // Dedicated outputs
-  input  wire [7:0] uio_in,   // IOs: Input path
-  output wire [7:0] uio_out,  // IOs: Output path
-  output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+  input  wire [7:1] uio_in,   // IOs: Input path
+  output wire [7:1] uio_out,  // IOs: Output path
+  output wire [7:1] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
   input  wire       ena,      // Always 1 when the design is powered
   input  wire       clk,      // Clock
   input  wire       rst_n     // Active low reset
@@ -93,9 +93,11 @@ module tt_um_sleepwell(
   end
 
   // Calculate squared distance from current pixel to ball center
-  wire [20:0] x_diff = {11'b0, x} - {11'b0, ball_x};
-  wire [20:0] y_diff = {11'b0, y} - {11'b0, ball_y};
-  wire [20:0] combine_eq = (x_diff * x_diff) + (y_diff * y_diff);
+  wire signed [10:0] x_diff = $signed({1'b0, x}) - $signed({1'b0, ball_x});
+  wire signed [10:0] y_diff = $signed({1'b0, y}) - $signed({1'b0, ball_y});
+  wire [20:0] x_sq = x_diff * x_diff;
+  wire [20:0] y_sq = y_diff * y_diff;
+  wire [20:0] combine_eq = x_sq + y_sq;
 
   // Determine if current pixel is within ball or its shadow area
   wire ball_active = video_active && (combine_eq <= BALL_SIZE * BALL_SIZE);
@@ -200,11 +202,12 @@ module tt_um_sleepwell(
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
 // Letter rendering
+wire [7:0] y_offset = y - LETTER_Y[7:0]; // Ensure 8-bit calculation
 wire [7:0] rom_addr = 
-  in_s1 ? {3'b0, (y - LETTER_Y)} :
-  in_j  ? {3'b0, (y - LETTER_Y)} + 8'd50 :
-  in_s2 ? {3'b0, (y - LETTER_Y)} + 8'd100 :
-          {3'b0, (y - LETTER_Y)} + 8'd150;
+  in_s1 ? y_offset :
+  in_j  ? y_offset + 8'd50 :
+  in_s2 ? y_offset + 8'd100 :
+          y_offset + 8'd150;
 
 wire [4:0] pixel_col = 
   in_s1 ? x - S1_X :
