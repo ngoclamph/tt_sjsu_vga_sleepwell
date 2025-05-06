@@ -4,6 +4,7 @@
  */
 
 `default_nettype none
+`include "hvsync_generator.v"
 module tt_um_sleepwell(
   input  wire [7:0] ui_in,    // Dedicated inputs
   output wire [7:0] uo_out,   // Dedicated outputs
