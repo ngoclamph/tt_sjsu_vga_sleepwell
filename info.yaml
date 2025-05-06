@@ -42,14 +42,14 @@ pinout:
   uo[7]: "HSYNC"
 
   # Bidirectional pins
-  uio[0]: "Audio (PWM)"
-  uio[1]: "Audio (PWM)"
-  uio[2]: "Audio (PWM)"
-  uio[3]: "Audio (PWM)"
-  uio[4]: "Audio (PWM)"
-  uio[5]: "Audio (PWM)"
-  uio[6]: "Audio (PWM)"
-  uio[7]: "Audio (PWM)"
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
 
 # Do not change!
 yaml_version: 6
