@@ -93,7 +93,7 @@ module tt_um_sleepwell(
   end
 
   // Calculate squared distance from current pixel to ball center
-  wire [20:0] combine_eq = (x - ball_x) * (x - ball_x) + (y - ball_y) * (y - ball_y);
+  //wire [20:0] combine_eq = (x - ball_x) * (x - ball_x) + (y - ball_y) * (y - ball_y);
 
   // Determine if current pixel is within ball or its shadow area
   wire ball_active = video_active && (combine_eq <= BALL_SIZE * BALL_SIZE);
