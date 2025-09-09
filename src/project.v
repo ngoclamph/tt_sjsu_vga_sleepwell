@@ -8,9 +8,9 @@
 module tt_um_sleepwell(
   input  wire [7:0] ui_in,    // Dedicated inputs
   output wire [7:0] uo_out,   // Dedicated outputs
-  input  wire [7:2] uio_in,   // IOs: Input path
-  output wire [7:2] uio_out,  // IOs: Output path
-  output wire [7:2] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+  input  wire [7:0] uio_in,   // IOs: Input path
+  output wire [7:0] uio_out,  // IOs: Output path
+  output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
   input  wire       ena,      // Always 1 when the design is powered
   input  wire       clk,      // Clock
   input  wire       rst_n     // Active low reset
