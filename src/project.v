@@ -188,15 +188,15 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
     // ... (fill all 50 rows for U)
   end
 
-  // Letter rendering
-  wire in_s1 = (x >= S1_X) && (x < S1_X + LETTER_WIDTH) && 
-               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
-  wire in_j  = (x >= J_X)  && (x < J_X + LETTER_WIDTH) && 
-               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
-  wire in_s2 = (x >= S2_X) && (x < S2_X + LETTER_WIDTH) && 
-               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
-  wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
-               (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+// Letter rendering
+wire in_s1 = (x >= S1_X) && (x < S1_X + LETTER_WIDTH) && 
+             (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+wire in_j  = (x >= J_X)  && (x < J_X + LETTER_WIDTH) && 
+             (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+wire in_s2 = (x >= S2_X) && (x < S2_X + LETTER_WIDTH) && 
+             (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
+wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
+             (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
 // Calculate the full, 10-bit column offset
 wire [9:0] pixel_col_full = x - (in_s1 ? S1_X :
@@ -204,14 +204,17 @@ wire [9:0] pixel_col_full = x - (in_s1 ? S1_X :
                             in_s2 ? S2_X :
                                     U_X);
 
-// The ROM address needs 9 bits to hold values up to 199
-wire [8:0] rom_addr = 
-    in_s1 ? (y - LETTER_Y) :
-    in_j  ? (y - LETTER_Y) + 8'd50 : // Use explicit decimal width for clarity
-    in_s2 ? (y - LETTER_Y) + 8'd100 :
-            (y - LETTER_Y) + 8'd150;
-  
-// The final column index for the ROM is just the lower 5 bits
+// The ROM address needs 8 bits to hold values from 0 to 199.
+// Use 8-bit constants (like 8'd50) to keep the addition within 8 bits.
+// The conditionals (in_s1, etc.) ensure y-LETTER_Y is always <= 49, so
+// (y-LETTER_Y) + 8'd150 will never exceed 199, which fits in 8 bits.
+wire [7:0] rom_addr = 
+    in_s1 ? (y - LETTER_Y) :               // Range: 0 to 49
+    in_j  ? (y - LETTER_Y) + 8'd50 :       // Range: 50 to 99
+    in_s2 ? (y - LETTER_Y) + 8'd100 :      // Range: 100 to 149
+            (y - LETTER_Y) + 8'd150;       // Range: 150 to 199
+
+// The final column index for the ROM is just the lower 5 bits of the full calculation
 wire [4:0] pixel_col = pixel_col_full[4:0];
 
 wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
