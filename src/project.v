@@ -198,7 +198,7 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
   wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
-  wire [7:0] rom_addr = 
+  wire [8:0] rom_addr = 
     in_s1 ? (y - LETTER_Y) :
     in_j  ? (y - LETTER_Y) + 50 :
     in_s2 ? (y - LETTER_Y) + 100 :
