@@ -204,12 +204,8 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
     in_s2 ? (y - LETTER_Y) + 100 :
             (y - LETTER_Y) + 150;
   
-  wire [4:0] pixel_col = x - 
-    (in_s1 ? S1_X : 
-     in_j  ? J_X  : 
-     in_s2 ? S2_X : 
-             U_X);
-  
+  wire [4:0] pixel_col = (x - (in_s1 ? S1_X : in_j ? J_X : in_s2 ? S2_X : U_X)) [4:0];
+
   wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
                      letter_rom[rom_addr][pixel_col] : 0;
 
