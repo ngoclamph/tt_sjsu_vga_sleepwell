@@ -198,16 +198,24 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
   wire in_u  = (x >= U_X)  && (x < U_X + LETTER_WIDTH) && 
                (y >= LETTER_Y) && (y < LETTER_Y + LETTER_HEIGHT);
 
-  wire [8:0] rom_addr = 
-    in_s1 ? (y - LETTER_Y) :
-    in_j  ? (y - LETTER_Y) + 50 :
-    in_s2 ? (y - LETTER_Y) + 100 :
-            (y - LETTER_Y) + 150;
-  
-  wire [4:0] pixel_col = (x - (in_s1 ? S1_X : in_j ? J_X : in_s2 ? S2_X : U_X)) [4:0];
+// Calculate the full, 10-bit column offset
+wire [9:0] pixel_col_full = x - (in_s1 ? S1_X :
+                            in_j  ? J_X  :
+                            in_s2 ? S2_X :
+                                    U_X);
 
-  wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
-                     letter_rom[rom_addr][pixel_col] : 0;
+// The ROM address needs 9 bits to hold values up to 199
+wire [8:0] rom_addr = 
+    in_s1 ? (y - LETTER_Y) :
+    in_j  ? (y - LETTER_Y) + 8'd50 : // Use explicit decimal width for clarity
+    in_s2 ? (y - LETTER_Y) + 8'd100 :
+            (y - LETTER_Y) + 8'd150;
+  
+// The final column index for the ROM is just the lower 5 bits
+wire [4:0] pixel_col = pixel_col_full[4:0];
+
+wire letter_pixel = (in_s1 || in_j || in_s2 || in_u) ? 
+                   letter_rom[rom_addr][pixel_col] : 1'b0;
 
   // Final output with priority: Ball > Shadow > Text > Background
   assign {R, G, B} =
