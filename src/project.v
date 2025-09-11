@@ -139,7 +139,36 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
     letter_rom[19]  = 30'b000011111111111111111111110000;
     letter_rom[20]  = 30'b000001111111111111111111100000;
     // ... (fill all 50 rows for S)
-    
+    letter_rom[21]  = 0;
+    letter_rom[22]  = 0;
+    letter_rom[23]  = 0;
+    letter_rom[24]  = 0;
+    letter_rom[25]  = 0;
+    letter_rom[26]  = 0;
+    letter_rom[27]  = 0;
+    letter_rom[28]  = 0;
+    letter_rom[29]  = 0;
+    letter_rom[30]  = 0;
+    letter_rom[31]  = 0;
+    letter_rom[32]  = 0;
+    letter_rom[33]  = 0;
+    letter_rom[34]  = 0;
+    letter_rom[35]  = 0;
+    letter_rom[36]  = 0;
+    letter_rom[37]  = 0;
+    letter_rom[38]  = 0;
+    letter_rom[39]  = 0;
+    letter_rom[40]  = 0;
+    letter_rom[41]  = 0;
+    letter_rom[42]  = 0;
+    letter_rom[43]  = 0;
+    letter_rom[44]  = 0;
+    letter_rom[45]  = 0;
+    letter_rom[46]  = 0;
+    letter_rom[47]  = 0;
+    letter_rom[48]  = 0;
+    letter_rom[49]  = 0;
+
     // Letter J
     letter_rom[50]  = 30'b000000000000000000000000000000;
     letter_rom[51]  = 30'b000000000000000000000000000000;
@@ -162,7 +191,37 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
     letter_rom[68]  = 30'b000011111111111111111111110000;
     letter_rom[69]  = 30'b000001111111111111111111100000;
     // ... (fill all 50 rows for J)
-    
+    letter_rom[70]  = 0;
+    letter_rom[71]  = 0;
+    letter_rom[72]  = 0;
+    letter_rom[73]  = 0;
+    letter_rom[74]  = 0;
+    letter_rom[75]  = 0;
+    letter_rom[76]  = 0;
+    letter_rom[77]  = 0;
+    letter_rom[78]  = 0;
+    letter_rom[79] = 0;
+    letter_rom[80] = 0;
+    letter_rom[81] = 0;
+    letter_rom[82] = 0;
+    letter_rom[83] = 0;
+    letter_rom[84] = 0;
+    letter_rom[85] = 0;
+    letter_rom[86] = 0;
+    letter_rom[87] = 0;
+    letter_rom[88] = 0;
+    letter_rom[89] = 0;
+    letter_rom[90] = 0;
+    letter_rom[91] = 0;
+    letter_rom[92] = 0;
+    letter_rom[93] = 0;
+    letter_rom[94] = 0;
+    letter_rom[95] = 0;
+    letter_rom[96] = 0;
+    letter_rom[97] = 0;
+    letter_rom[98] = 0;
+    letter_rom[99] = 0;
+
     // Letter S (second) - same as first S
     for (int i=0; i<50; i=i+1) letter_rom[100+i] = letter_rom[i];
     
@@ -186,6 +245,39 @@ wire [20:0] combine_eq = ( {11'b0, x} - {11'b0, ball_x} ) * ( {11'b0, x} - {11'b
     letter_rom[166] = 30'b000011111111111111111111110000;
     letter_rom[167] = 30'b000001111111111111111111100000;
     // ... (fill all 50 rows for U)
+    letter_rom[168] = 0;
+    letter_rom[169] = 0;
+    letter_rom[170] = 0;
+    letter_rom[171] = 0;
+    letter_rom[172] = 0;
+    letter_rom[173] = 0;
+    letter_rom[174] = 0;
+    letter_rom[175] = 0;
+    letter_rom[176] = 0;
+    letter_rom[177] = 0;
+    letter_rom[178] = 0;
+    letter_rom[179] = 0;
+    letter_rom[180] = 0;
+    letter_rom[181] = 0;
+    letter_rom[182] = 0;
+    letter_rom[183] = 0;
+    letter_rom[184] = 0;
+    letter_rom[185] = 0;
+    letter_rom[186] = 0;
+    letter_rom[187] = 0;
+    letter_rom[188] = 0;
+    letter_rom[189] = 0;
+    letter_rom[190] = 0;
+    letter_rom[191] = 0;
+    letter_rom[192] = 0;
+    letter_rom[193] = 0;
+    letter_rom[194] = 0;
+    letter_rom[195] = 0;
+    letter_rom[196] = 0;
+    letter_rom[197] = 0;
+    letter_rom[198] = 0;
+    letter_rom[199] = 0;
+
   end
 
 // Letter rendering
